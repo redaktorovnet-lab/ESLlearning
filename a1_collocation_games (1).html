@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A1 Collocation Games – take / go / want</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f0f7ff;
+    --card: #ffffff;
+    --teal: #00b4a6;
+    --coral: #ff6b6b;
+    --yellow: #ffd166;
+    --purple: #7c5cbf;
+    --blue: #3a86ff;
+    --green: #06d6a0;
+    --dark: #1a1a2e;
+    --muted: #6b7a99;
+    --radius: 18px;
+    --shadow: 0 8px 32px rgba(60,80,140,0.10);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Nunito', sans-serif; background: var(--bg); min-height: 100vh; color: var(--dark); }
+
+  .tab-bar { display: flex; justify-content: center; gap: 10px; padding: 22px 16px 0; flex-wrap: wrap; }
+  .tab-btn {
+    font-family: 'Baloo 2', cursive; font-size: 0.95rem; padding: 10px 22px;
+    border: none; border-radius: 50px; cursor: pointer; background: #dde8f8;
+    color: var(--muted); font-weight: 700; transition: all .2s;
+  }
+  .tab-btn.active { background: var(--blue); color: #fff; box-shadow: 0 4px 16px rgba(58,134,255,.3); transform: translateY(-2px); }
+  .tab-btn:hover:not(.active) { background: #c8d8f5; }
+
+  .section { display: none; padding: 24px 16px 40px; max-width: 720px; margin: 0 auto; }
+  .section.active { display: block; }
+
+  .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 28px 24px; margin-bottom: 20px; }
+  .card h2 { font-family: 'Baloo 2', cursive; font-size: 1.5rem; margin-bottom: 6px; color: var(--blue); }
+  .card .subtitle { color: var(--muted); font-size: 0.95rem; margin-bottom: 20px; }
+
+  .progress-wrap { margin-bottom: 18px; }
+  .progress-label { font-size: 0.85rem; color: var(--muted); margin-bottom: 5px; font-weight: 700; }
+  .progress-bar { height: 10px; background: #e0e8f5; border-radius: 99px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--teal), var(--blue)); transition: width .5s ease; }
+
+  .btn { display: inline-block; padding: 12px 28px; border: none; border-radius: 50px; font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 800; cursor: pointer; transition: all .15s; }
+  .btn-primary { background: var(--blue); color: #fff; box-shadow: 0 4px 14px rgba(58,134,255,.3); }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(58,134,255,.4); }
+  .btn-teal { background: var(--teal); color: #fff; }
+  .btn-teal:hover { transform: translateY(-2px); }
+
+  /* ===== GAME 1 – SOFIA ===== */
+  .g1-story-context {
+    background: linear-gradient(135deg, #fff8f0, #fff3e0);
+    border-radius: 14px;
+    padding: 14px 18px;
+    margin-bottom: 16px;
+    border-left: 4px solid var(--yellow);
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: #5a4010;
+    font-weight: 700;
+  }
+  .g1-story-context .ctx-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #b07a10;
+    margin-bottom: 4px;
+    display: block;
+  }
+  #g1-scene { font-size: 3.2rem; text-align: center; margin: 6px 0 6px; animation: popIn .4s ease; }
+  #g1-question { font-size: 1.12rem; font-weight: 800; text-align: center; margin-bottom: 18px; line-height: 1.45; }
+  .g1-options { display: flex; flex-direction: column; gap: 10px; }
+  .g1-opt {
+    padding: 13px 20px; border-radius: 14px; border: 2.5px solid #dde8f8;
+    background: #f7fbff; font-size: 1rem; font-weight: 700; cursor: pointer;
+    transition: all .15s; text-align: left;
+  }
+  .g1-opt:hover:not(:disabled) { border-color: var(--blue); background: #eaf2ff; }
+  .g1-opt.correct { background: #d4f7ec; border-color: var(--green); color: #058a63; }
+  .g1-opt.wrong   { background: #ffe0e0; border-color: var(--coral); color: #c0392b; }
+  .g1-opt:disabled { cursor: default; }
+  #g1-feedback { font-size: 0.97rem; font-weight: 800; text-align: center; margin-top: 12px; min-height: 28px; line-height: 1.4; }
+  #g1-feedback.ok  { color: var(--green); }
+  #g1-feedback.bad { color: var(--coral); }
+  #g1-next { margin-top: 14px; display: none; }
+
+  .score-screen { text-align: center; padding: 10px 0; }
+  .score-screen .big-score { font-family: 'Baloo 2', cursive; font-size: 4rem; color: var(--blue); line-height: 1; }
+  .score-screen .msg { font-size: 1.1rem; margin: 10px 0 20px; color: var(--muted); }
+  .score-screen .stars { font-size: 2.5rem; margin-bottom: 14px; }
+
+  /* ===== GAME 2 – FIX ===== */
+  #g2-sentence { font-size: 1.2rem; font-weight: 700; line-height: 1.8; margin-bottom: 14px; text-align: center; }
+  .g2-verb-btn {
+    display: inline; padding: 2px 8px; border-radius: 8px; border: 2.5px dashed var(--blue);
+    background: #eaf2ff; color: var(--blue); font-weight: 900; font-size: 1.1rem;
+    cursor: pointer; font-family: 'Nunito', sans-serif; transition: all .15s;
+  }
+  .g2-verb-btn:hover { background: var(--blue); color: #fff; }
+  .g2-verb-btn.correct-locked { border-color: var(--green); background: #d4f7ec; color: #058a63; border-style: solid; cursor: default; }
+  .g2-verb-btn.wrong-verb { border-color: var(--coral); background: #ffe0e0; color: #c0392b; cursor: default; border-style: solid; }
+  #g2-emoji { font-size: 1.1rem; text-align: center; margin-bottom: 6px; color: var(--muted); font-weight: 700; }
+  #g2-status { font-size: 1rem; font-weight: 800; text-align: center; min-height: 26px; margin-bottom: 10px; }
+  #g2-status.ok  { color: var(--green); }
+  #g2-status.bad { color: var(--coral); }
+  .g2-fix-choices { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 10px; }
+  .g2-fix-btn {
+    padding: 10px 22px; border-radius: 50px; border: none; font-family: 'Nunito', sans-serif;
+    font-size: 1rem; font-weight: 800; cursor: pointer; background: #eaf2ff; color: var(--blue); transition: all .15s;
+  }
+  .g2-fix-btn:hover { background: var(--blue); color: #fff; }
+  .g2-fix-correct { background: var(--green) !important; color: #fff !important; }
+  .g2-fix-wrong   { background: var(--coral) !important; color: #fff !important; }
+  #g2-next { display: none; margin-top: 14px; text-align: center; }
+  #g2-instruct { color: var(--muted); font-size: 0.9rem; text-align: center; margin-bottom: 6px; }
+
+  /* ===== GAME 3 – WRITING ===== */
+  .g3-prompt-card {
+    background: linear-gradient(135deg, #f5f0ff, #ede7ff);
+    border-radius: 16px;
+    padding: 18px 20px;
+    margin-bottom: 18px;
+    border-left: 5px solid var(--purple);
+  }
+  .g3-prompt-card .prompt-num {
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px;
+    color: var(--purple); font-weight: 800; margin-bottom: 4px;
+  }
+  .g3-prompt-card .prompt-situation {
+    font-size: 1.05rem; font-weight: 800; margin-bottom: 8px; line-height: 1.4;
+  }
+  .g3-prompt-card .prompt-hint {
+    font-size: 0.85rem; color: #7c5cbf; background: rgba(124,92,191,.1);
+    border-radius: 8px; padding: 6px 12px; display: inline-block; font-weight: 700;
+  }
+  .g3-input-row { display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap; margin-top: 10px; }
+  .g3-input-row textarea {
+    flex: 1; min-width: 200px; padding: 12px 16px; border-radius: 12px;
+    border: 2.5px solid #dde8f8; font-family: 'Nunito', sans-serif;
+    font-size: 1rem; font-weight: 700; resize: vertical; min-height: 54px;
+    transition: border-color .2s; outline: none; line-height: 1.5;
+  }
+  .g3-input-row textarea:focus { border-color: var(--purple); }
+  .g3-check-btn {
+    padding: 12px 20px; border-radius: 12px; border: none; background: var(--purple);
+    color: #fff; font-family: 'Nunito', sans-serif; font-size: 0.95rem;
+    font-weight: 800; cursor: pointer; white-space: nowrap; transition: all .15s;
+  }
+  .g3-check-btn:hover { transform: translateY(-2px); }
+  .g3-feedback-box {
+    margin-top: 10px; padding: 10px 16px; border-radius: 10px;
+    font-size: 0.9rem; font-weight: 700; line-height: 1.5; display: none;
+  }
+  .g3-feedback-box.ok  { background: #d4f7ec; color: #046b4d; }
+  .g3-feedback-box.hint { background: #fff8e1; color: #7a5a00; border: 1.5px solid var(--yellow); }
+  .g3-feedback-box.bad  { background: #ffe0e0; color: #b02020; }
+
+  .g3-progress-wrap { text-align: center; margin-bottom: 18px; }
+  .g3-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #dde8f8; margin: 0 3px; transition: background .3s; }
+  .g3-dot.done { background: var(--purple); }
+  .g3-dot.ok { background: var(--green); }
+
+  .g3-summary {
+    display: none;
+    background: linear-gradient(135deg, #f5f0ff, #eaf2ff);
+    border-radius: 16px; padding: 24px;
+    margin-top: 10px;
+  }
+  .g3-summary h3 { font-family: 'Baloo 2', cursive; font-size: 1.3rem; color: var(--purple); margin-bottom: 14px; }
+  .g3-summary-line {
+    padding: 10px 14px; border-radius: 10px; margin-bottom: 8px;
+    font-size: 0.95rem; font-weight: 700; line-height: 1.5;
+  }
+  .g3-summary-line.good { background: #d4f7ec; color: #046b4d; }
+  .g3-summary-line.check { background: #fff8e1; color: #7a5a00; }
+  .g3-summary-line .correct-ver { display: block; font-size: 0.82rem; margin-top: 3px; opacity: .85; }
+
+  /* VOCAB */
+  .vocab-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
+  .vocab-card { border-radius: 16px; padding: 16px; text-align: center; font-weight: 800; font-size: 0.95rem; box-shadow: 0 4px 14px rgba(0,0,0,.06); transition: transform .15s; cursor: default; }
+  .vocab-card:hover { transform: translateY(-3px); }
+  .vocab-card .vc-emoji { font-size: 2.2rem; display: block; margin-bottom: 6px; }
+  .vc-take { background: #fff3e0; }
+  .vc-go   { background: #e0f7f5; }
+  .vc-want { background: #ede7ff; }
+
+  @keyframes popIn { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .animate-pop { animation: popIn .35s ease; }
+</style>
+</head>
+<body>
+
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="showTab(0)">📚 Vocabulary</button>
+  <button class="tab-btn" onclick="showTab(1)">🌅 Sofia's Day</button>
+  <button class="tab-btn" onclick="showTab(2)">✏️ Fix It!</button>
+  <button class="tab-btn" onclick="showTab(3)">🏖️ Maksym's Saturday</button>
+</div>
+
+<!-- ===== VOCAB ===== -->
+<div class="section active" id="tab0">
+  <div class="card">
+    <h2>📖 Vocabulary: take / go / want</h2>
+    <p class="subtitle">Look at the pictures. Remember the phrases!</p>
+    <div class="vocab-grid">
+      <div class="vocab-card vc-take"><span class="vc-emoji">🚌</span>take the bus</div>
+      <div class="vocab-card vc-take"><span class="vc-emoji">📸</span>take a photo</div>
+      <div class="vocab-card vc-take"><span class="vc-emoji">🚿</span>take a shower</div>
+      <div class="vocab-card vc-take"><span class="vc-emoji">⏳</span>take a long time</div>
+      <div class="vocab-card vc-go"><span class="vc-emoji">🌳</span>go to the park</div>
+      <div class="vocab-card vc-go"><span class="vc-emoji">🏥</span>go to the doctor</div>
+      <div class="vocab-card vc-go"><span class="vc-emoji">✈️</span>go on holiday</div>
+      <div class="vocab-card vc-go"><span class="vc-emoji">🛍️</span>go shopping</div>
+      <div class="vocab-card vc-want"><span class="vc-emoji">☕</span>want a coffee</div>
+      <div class="vocab-card vc-want"><span class="vc-emoji">🏠</span>want a new house</div>
+      <div class="vocab-card vc-want"><span class="vc-emoji">🇺🇦</span>want to go to Ukraine</div>
+      <div class="vocab-card vc-want"><span class="vc-emoji">👗</span>want to buy some clothes</div>
+    </div>
+  </div>
+  <div style="text-align:center"><button class="btn btn-primary" onclick="showTab(1)">Start Game 1 →</button></div>
+</div>
+
+<!-- ===== GAME 1: SOFIA'S DAY ===== -->
+<div class="section" id="tab1">
+  <div class="card" id="g1-main-card">
+    <h2>🌅 A Day in Sofia's Life</h2>
+    <p class="subtitle">10 situations. Choose the correct phrase!</p>
+    <div class="progress-wrap">
+      <div class="progress-label" id="g1-prog-label">Question 1 of 10</div>
+      <div class="progress-bar"><div class="progress-fill" id="g1-fill" style="width:10%"></div></div>
+    </div>
+    <div class="g1-story-context" id="g1-context"></div>
+    <div id="g1-scene"></div>
+    <div id="g1-question"></div>
+    <div class="g1-options" id="g1-opts"></div>
+    <div id="g1-feedback"></div>
+    <div style="text-align:center"><button class="btn btn-primary" id="g1-next" style="display:none" onclick="g1Next()">Next ➡️</button></div>
+  </div>
+  <div id="g1-score-card" style="display:none" class="card">
+    <div class="score-screen">
+      <div class="stars" id="g1-stars"></div>
+      <div class="big-score" id="g1-score-text"></div>
+      <div class="msg" id="g1-score-msg"></div>
+      <button class="btn btn-primary" onclick="g1Restart()">🔄 Play Again</button>
+      <button class="btn btn-teal" style="margin-left:10px" onclick="showTab(2)">Next Game →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== GAME 2: FIX IT ===== -->
+<div class="section" id="tab2">
+  <div class="card" id="g2-main-card">
+    <h2>✏️ Fix the Weird Sentence!</h2>
+    <p class="subtitle">Click the wrong verb and fix it — or say it's correct! 😄</p>
+    <div class="progress-wrap">
+      <div class="progress-label" id="g2-prog-label">Sentence 1 of 12</div>
+      <div class="progress-bar"><div class="progress-fill" id="g2-fill" style="width:8%"></div></div>
+    </div>
+    <div id="g2-emoji"></div>
+    <div id="g2-instruct"></div>
+    <div id="g2-sentence"></div>
+    <div id="g2-status"></div>
+    <div class="g2-fix-choices" id="g2-choices"></div>
+    <div id="g2-next"><button class="btn btn-primary" onclick="g2Next()">Next ➡️</button></div>
+  </div>
+  <div id="g2-score-card" style="display:none" class="card">
+    <div class="score-screen">
+      <div class="stars" id="g2-stars"></div>
+      <div class="big-score" id="g2-score-text"></div>
+      <div class="msg" id="g2-score-msg"></div>
+      <button class="btn btn-primary" onclick="g2Restart()">🔄 Play Again</button>
+      <button class="btn btn-teal" style="margin-left:10px" onclick="showTab(3)">Next Game →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== GAME 3: WRITING ===== -->
+<div class="section" id="tab3">
+  <div class="card">
+    <h2>🏖️ Write About Your Perfect Saturday, Maksym!</h2>
+    <p class="subtitle">Read each situation. Write one sentence. Use the words in the hint! ✍️</p>
+
+    <div class="g3-progress-wrap" id="g3-dots"></div>
+    <div id="g3-prompts"></div>
+
+    <div id="g3-summary" class="g3-summary">
+      <h3>🎉 Your Saturday Story!</h3>
+      <div id="g3-summary-lines"></div>
+      <div style="margin-top:16px;text-align:center">
+        <button class="btn btn-primary" onclick="g3Restart()">🔄 Try Again</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== TABS =====
+function showTab(n){
+  document.querySelectorAll('.section').forEach((s,i)=>s.classList.toggle('active',i===n));
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',i===n));
+}
+
+// ===== GAME 1 =====
+const g1Data = [
+  {
+    context: "🌍 Sofia is from Poland. She lives in Warsaw. She works in a bank in the city centre.",
+    emoji:"🌅🚿",
+    q:"It is 7am. Sofia's alarm rings. She is sleepy. She needs to feel awake. What does she do first?",
+    correct:"take a shower",
+    opts:["take a shower","go a shower","want a shower"]
+  },
+  {
+    context: "🚌 Sofia's office is far from her flat. She doesn't have a car. Every morning she goes to the bus stop.",
+    emoji:"🚌⏰",
+    q:"Sofia is at the bus stop. The Number 15 arrives. What does she do?",
+    correct:"take the bus",
+    opts:["go the bus","take the bus","want the bus"]
+  },
+  {
+    context: "🌸 Sofia walks to work on Fridays. Today she sees a beautiful pink tree in the park. It is very pretty!",
+    emoji:"📸🌸",
+    q:"Sofia stops. She picks up her phone. She thinks: 'My mum will love this!' What does she do?",
+    correct:"take a photo",
+    opts:["take a photo","go a photo","want a photo"]
+  },
+  {
+    context: "🌳 It is Sunday. The weather is sunny and warm. Sofia finishes her coffee. She puts on her shoes.",
+    emoji:"🌳☀️",
+    q:"Sofia opens the door and walks outside. Where does she go?",
+    correct:"go to the park",
+    opts:["take to the park","go to the park","want the park"]
+  },
+  {
+    context: "🤒 It is Tuesday. Sofia has a headache. She has a temperature of 38°C. She feels terrible. She calls her boss: 'I can't come to work today.'",
+    emoji:"🤒🏥",
+    q:"Sofia's mum says: 'You need help!' What does Sofia do next?",
+    correct:"go to the doctor",
+    opts:["take the doctor","go to the doctor","want the doctor"]
+  },
+  {
+    context: "✈️ It is June. Sofia has two weeks of holiday from work. She looks at her calendar. She books flights to Spain.",
+    emoji:"✈️🏖️",
+    q:"Sofia is very excited! What does she do every summer?",
+    correct:"go on holiday",
+    opts:["take on holiday","go on holiday","want on holiday"]
+  },
+  {
+    context: "🛍️ Sofia's winter jacket is old and grey. She needs new boots too. It is Saturday morning.",
+    emoji:"🛍️👟",
+    q:"Sofia takes her bag and goes to the city centre. What does she do?",
+    correct:"go shopping",
+    opts:["go shopping","take shopping","want shopping"]
+  },
+  {
+    context: "☕ It is Monday. 8am. Sofia arrives at the office. She didn't sleep well. She sits at her desk. Her eyes are closing.",
+    emoji:"☕😴",
+    q:"Sofia looks at the coffee machine. She stands up. What does she want?",
+    correct:"want a coffee",
+    opts:["take a coffee","go a coffee","want a coffee"]
+  },
+  {
+    context: "🏠 Sofia's flat is small — just one room. She has no garden. The neighbours are very loud. She saves money every month.",
+    emoji:"🏠💭",
+    q:"Sofia opens a property website every evening. She looks at big flats and houses. What does she want?",
+    correct:"want a new house",
+    opts:["take a new house","go a new house","want a new house"]
+  },
+  {
+    context: "⏳ Sofia is a very careful cook. She reads every step of the recipe slowly. She cuts vegetables very precisely.",
+    emoji:"⏳🍳",
+    q:"Her friend asks: 'Is dinner ready?' Sofia says: 'Not yet! This recipe...'",
+    correct:"takes a long time",
+    opts:["takes a long time","goes a long time","wants a long time"]
+  },
+];
+
+let g1Idx=0, g1Score=0;
+function g1Render(){
+  const d=g1Data[g1Idx];
+  document.getElementById('g1-fill').style.width=((g1Idx+1)/10*100)+'%';
+  document.getElementById('g1-prog-label').textContent=`Question ${g1Idx+1} of 10`;
+  document.getElementById('g1-context').innerHTML=`<span class="ctx-label">📖 Story context</span>${d.context}`;
+  document.getElementById('g1-scene').textContent=d.emoji;
+  document.getElementById('g1-question').textContent=d.q;
+  document.getElementById('g1-feedback').textContent='';
+  document.getElementById('g1-feedback').className='';
+  document.getElementById('g1-next').style.display='none';
+  const opts=document.getElementById('g1-opts');
+  opts.innerHTML='';
+  [...d.opts].sort(()=>Math.random()-.5).forEach(o=>{
+    const b=document.createElement('button');
+    b.className='g1-opt'; b.textContent=o;
+    b.onclick=()=>g1Answer(o,d.correct);
+    opts.appendChild(b);
+  });
+}
+function g1Answer(chosen,correct){
+  document.querySelectorAll('.g1-opt').forEach(b=>{
+    b.disabled=true;
+    if(b.textContent===correct) b.classList.add('correct');
+    else if(b.textContent===chosen&&chosen!==correct) b.classList.add('wrong');
+  });
+  const fb=document.getElementById('g1-feedback');
+  if(chosen===correct){ g1Score++; fb.textContent='✅ Great job!'; fb.className='ok'; }
+  else { fb.textContent=`❌ The answer is: "${correct}"`; fb.className='bad'; }
+  document.getElementById('g1-next').style.display='inline-block';
+}
+function g1Next(){ g1Idx++; if(g1Idx>=10){g1ShowScore();return;} g1Render(); }
+function g1ShowScore(){
+  document.getElementById('g1-main-card').style.display='none';
+  document.getElementById('g1-score-card').style.display='block';
+  document.getElementById('g1-score-text').textContent=`${g1Score}/10`;
+  document.getElementById('g1-stars').textContent=g1Score>=9?'⭐⭐⭐':g1Score>=6?'⭐⭐':'⭐';
+  document.getElementById('g1-score-msg').textContent=g1Score>=9?'Amazing! Sofia is very proud of you! 🎉':g1Score>=6?'Good work! Try again for more stars! 😊':'Keep practising! You can do it! 💪';
+}
+function g1Restart(){
+  g1Idx=0; g1Score=0;
+  document.getElementById('g1-main-card').style.display='block';
+  document.getElementById('g1-score-card').style.display='none';
+  g1Render();
+}
+g1Render();
+
+// ===== GAME 2 =====
+const g2Data = [
+  { parts:["I ","go"," a shower every morning. 🚿"], isCorrect:false, correct:"take", emoji:"🚿😅", note:"You can't 'go' a shower. Think: you TAKE a shower." },
+  { parts:["She ","takes"," the bus to work."], isCorrect:true, correct:"takes", emoji:"🚌", note:"Sofia is a good commuter!" },
+  { parts:["He ","wants"," a new house in a nice city."], isCorrect:true, correct:"wants", emoji:"🏠", note:"Who doesn't?" },
+  { parts:["She ","takes"," shopping every Saturday!"], isCorrect:false, correct:"goes", emoji:"🛍️😄", note:"You can't carry the shops! She GOES shopping." },
+  { parts:["I ","go"," a photo of every pizza I eat. 📸"], isCorrect:false, correct:"take", emoji:"📸🍕", note:"That's a lot of pizza. But you TAKE a photo, not 'go'!" },
+  { parts:["He ","takes"," to the doctor when he is sick."], isCorrect:false, correct:"goes", emoji:"🏥😬", note:"He can't carry the doctor! He GOES to the doctor." },
+  { parts:["I ","want"," to buy some new clothes."], isCorrect:true, correct:"want", emoji:"👗", note:"Let's go shopping!" },
+  { parts:["She ","goes"," on holiday every summer."], isCorrect:true, correct:"goes", emoji:"✈️", note:"Lucky Sofia!" },
+  { parts:["This homework ","wants"," a very long time!"], isCorrect:false, correct:"takes", emoji:"⏳😩", note:"Homework doesn't want anything! It TAKES a long time." },
+  { parts:["He ","takes"," to the park with his dog."], isCorrect:false, correct:"goes", emoji:"🐕🌳", note:"The dog takes HIM! But he GOES to the park." },
+  { parts:["I ","want"," a coffee, please. ☕"], isCorrect:true, correct:"want", emoji:"☕", note:"Very reasonable!" },
+  { parts:["She ","goes"," a photo at the Eiffel Tower."], isCorrect:false, correct:"takes", emoji:"📸🗼", note:"She can't 'go' a photo! She TAKES a photo." },
+];
+
+let g2Idx=0, g2Score=0, g2Answered=false;
+function g2Render(){
+  const d=g2Data[g2Idx];
+  g2Answered=false;
+  document.getElementById('g2-fill').style.width=((g2Idx+1)/12*100)+'%';
+  document.getElementById('g2-prog-label').textContent=`Sentence ${g2Idx+1} of 12`;
+  document.getElementById('g2-emoji').textContent=d.isCorrect?'🤔 Is this correct?' :'🤔 Something is wrong here...';
+  document.getElementById('g2-instruct').textContent=d.isCorrect?'Click the verb if you think it is WRONG. Or press ✅ Correct!':'Click the underlined verb to fix it!';
+  document.getElementById('g2-status').textContent=''; document.getElementById('g2-status').className='';
+  document.getElementById('g2-choices').innerHTML='';
+  document.getElementById('g2-next').style.display='none';
+  const sentEl=document.getElementById('g2-sentence');
+  sentEl.innerHTML='';
+  d.parts.forEach((p,i)=>{
+    if(i===1){
+      const btn=document.createElement('button');
+      btn.className='g2-verb-btn'; btn.textContent=p; btn.id='g2-vbtn';
+      btn.onclick=()=>g2ClickVerb(d); sentEl.appendChild(btn);
+    } else { sentEl.appendChild(document.createTextNode(p)); }
+  });
+  const choicesEl=document.getElementById('g2-choices');
+  const cb=document.createElement('button'); cb.className='g2-fix-btn'; cb.textContent="✅ It's correct!";
+  cb.onclick=()=>g2Answer(d,true); choicesEl.appendChild(cb);
+}
+function g2ClickVerb(d){
+  if(g2Answered) return;
+  const choices=document.getElementById('g2-choices'); choices.innerHTML='';
+  if(!d.isCorrect){
+    ['take','go','want'].forEach(v=>{
+      const b=document.createElement('button'); b.className='g2-fix-btn'; b.textContent=v;
+      b.onclick=()=>g2Answer(d,false,v); choices.appendChild(b);
+    });
+  }
+  const cb=document.createElement('button'); cb.className='g2-fix-btn'; cb.textContent="✅ It's correct!";
+  cb.onclick=()=>g2Answer(d,true); choices.appendChild(cb);
+}
+function g2Answer(d,saidCorrect,pickedVerb){
+  if(g2Answered) return; g2Answered=true;
+  const vbtn=document.getElementById('g2-vbtn');
+  const st=document.getElementById('g2-status');
+  let win=(d.isCorrect&&saidCorrect)||(!d.isCorrect&&!saidCorrect&&pickedVerb===d.correct);
+  document.getElementById('g2-choices').querySelectorAll('.g2-fix-btn').forEach(b=>{
+    if(d.isCorrect){ if(b.textContent==="✅ It's correct!") b.classList.add(win?'g2-fix-correct':'g2-fix-wrong'); }
+    else { if(b.textContent===d.correct) b.classList.add('g2-fix-correct'); else if(b.textContent===pickedVerb&&!win) b.classList.add('g2-fix-wrong'); }
+    b.disabled=true;
+  });
+  vbtn.className='g2-verb-btn '+(d.isCorrect?'correct-locked':'wrong-verb');
+  if(win){ g2Score++; st.textContent='✅ '+d.note; st.className='ok'; }
+  else {
+    st.textContent=d.isCorrect?`❌ It WAS correct! "${d.parts[1]}" is right here. ${d.note}`:`❌ Use "${d.correct}"! ${d.note}`;
+    st.className='bad';
+  }
+  document.getElementById('g2-next').style.display='block';
+}
+function g2Next(){ g2Idx++; if(g2Idx>=12){g2ShowScore();return;} g2Render(); }
+function g2ShowScore(){
+  document.getElementById('g2-main-card').style.display='none';
+  document.getElementById('g2-score-card').style.display='block';
+  document.getElementById('g2-score-text').textContent=`${g2Score}/12`;
+  document.getElementById('g2-stars').textContent=g2Score>=11?'⭐⭐⭐':g2Score>=8?'⭐⭐':'⭐';
+  document.getElementById('g2-score-msg').textContent=g2Score>=11?'Grammar detective! 🕵️ You found all the mistakes!':g2Score>=8?'Very good! You have a great eye! 😊':'Keep practising! Mistakes help us learn! 💪';
+}
+function g2Restart(){
+  g2Idx=0; g2Score=0;
+  document.getElementById('g2-main-card').style.display='block';
+  document.getElementById('g2-score-card').style.display='none';
+  g2Render();
+}
+g2Render();
+
+// ===== GAME 3: WRITING =====
+const g3Prompts = [
+  {
+    num:"1 of 6", emoji:"🌅",
+    situation:"It is Saturday morning. Maksym wakes up. He wants to feel fresh and clean.",
+    hint:"Use: take a shower",
+    subject:"I", verb:"take", keyword:"shower",
+    keywords:["take","shower"],
+    modelAnswer:"I take a shower.",
+    tip:'Write: "I take a shower." or "On Saturday morning, I take a shower."'
+  },
+  {
+    num:"2 of 6", emoji:"🚌",
+    situation:"Maksym doesn't drive on Saturdays. He wants to go to the city centre. He goes to the bus stop.",
+    hint:"Use: take the bus",
+    subject:"I", verb:"take", keyword:"bus",
+    keywords:["take","bus"],
+    modelAnswer:"I take the bus to the city centre.",
+    tip:'Write: "I take the bus." or "I take the bus to the city centre."'
+  },
+  {
+    num:"3 of 6", emoji:"🏓",
+    situation:"It is 11am. Maksym loves sport. His friend Artem calls: 'Paddle today?' Maksym says yes!",
+    hint:"Use: go + play paddle / go to the paddle court",
+    subject:"I", verb:"go", keyword:"paddle",
+    keywords:["go","paddle"],
+    modelAnswer:"I go to the paddle court.",
+    tip:'Write: "I go to the paddle court." or "I go and play paddle."'
+  },
+  {
+    num:"4 of 6", emoji:"🛍️",
+    situation:"Maksym needs new trainers and a jacket. He walks around the shops.",
+    hint:"Use: go shopping / want to buy some clothes",
+    subject:"I", verb:"go", keyword:"shopping",
+    keywords:["go","shop"],
+    modelAnswer:"I go shopping. I want to buy some clothes.",
+    tip:'Write: "I go shopping." or "I go shopping and I want to buy some clothes."'
+  },
+  {
+    num:"5 of 6", emoji:"☕",
+    situation:"It is 3pm. Maksym is tired after paddle. He sits in a café in Warsaw.",
+    hint:"Use: want a coffee",
+    subject:"I", verb:"want", keyword:"coffee",
+    keywords:["want","coffee"],
+    modelAnswer:"I want a coffee.",
+    tip:'Write: "I want a coffee." or "I sit in a café and I want a coffee."'
+  },
+  {
+    num:"6 of 6", emoji:"🏠",
+    situation:"In the evening, Maksym thinks about the future. Warsaw is nice, but he wants a change. He looks at flats in other cities.",
+    hint:"Use: want a new house / want to go on holiday",
+    subject:"I", verb:"want", keyword:"house",
+    keywords:["want","house","holiday"],
+    modelAnswer:"I want a new house in a new city.",
+    tip:'Write: "I want a new house." or "I want to go on holiday." or both!'
+  },
+];
+
+const g3Written = Array(g3Prompts.length).fill('');
+const g3Results = Array(g3Prompts.length).fill(null);
+
+function g3BuildDots(){
+  const el=document.getElementById('g3-dots');
+  el.innerHTML='';
+  g3Prompts.forEach((_,i)=>{
+    const d=document.createElement('span');
+    d.className='g3-dot'; d.id=`g3-dot-${i}`; el.appendChild(d);
+  });
+}
+
+function g3BuildPrompts(){
+  const el=document.getElementById('g3-prompts');
+  el.innerHTML='';
+  g3Prompts.forEach((p,i)=>{
+    const wrap=document.createElement('div');
+    wrap.className='g3-prompt-card'; wrap.id=`g3-pcard-${i}`;
+    wrap.innerHTML=`
+      <div class="prompt-num">${p.emoji} Situation ${p.num}</div>
+      <div class="prompt-situation">${p.situation}</div>
+      <div class="prompt-hint">💡 Hint: <em>${p.hint}</em></div>
+      <div class="g3-input-row">
+        <textarea id="g3-ta-${i}" placeholder="Write your sentence here..." oninput="g3Written[${i}]=this.value; g3CheckAllFilled()"></textarea>
+        <button class="g3-check-btn" onclick="g3Check(${i})">Check ✓</button>
+      </div>
+      <div class="g3-feedback-box" id="g3-fb-${i}"></div>
+    `;
+    el.appendChild(wrap);
+  });
+}
+
+function g3CheckAllFilled(){
+  const allFilled=g3Prompts.every((_,i)=>document.getElementById(`g3-ta-${i}`).value.trim().length>2);
+}
+
+function g3Check(i){
+  const text=document.getElementById(`g3-ta-${i}`).value.trim().toLowerCase();
+  const p=g3Prompts[i];
+  const fb=document.getElementById(`g3-fb-${i}`);
+  fb.style.display='block';
+  const hasVerb=text.includes(p.keywords[0]);
+  const hasKey=p.keywords.slice(1).some(k=>text.includes(k));
+  const dotEl=document.getElementById(`g3-dot-${i}`);
+
+  if(hasVerb && hasKey){
+    fb.className='g3-feedback-box ok';
+    fb.textContent='✅ Great sentence! You used the right words.';
+    g3Results[i]={text:document.getElementById(`g3-ta-${i}`).value.trim(), good:true, model:p.modelAnswer};
+    dotEl.className='g3-dot ok';
+  } else if(hasVerb||hasKey){
+    fb.className='g3-feedback-box hint';
+    fb.innerHTML=`🤔 Almost! ${p.tip}`;
+    g3Results[i]={text:document.getElementById(`g3-ta-${i}`).value.trim(), good:false, model:p.modelAnswer};
+    dotEl.className='g3-dot done';
+  } else {
+    fb.className='g3-feedback-box bad';
+    fb.innerHTML=`❌ Try again! ${p.tip}`;
+    dotEl.className='g3-dot done';
+  }
+
+  // show summary button if all checked
+  if(g3Results.every(r=>r!==null)){
+    setTimeout(g3ShowSummary, 400);
+  }
+}
+
+function g3ShowSummary(){
+  document.getElementById('g3-summary').style.display='block';
+  const lines=document.getElementById('g3-summary-lines');
+  lines.innerHTML='';
+  g3Prompts.forEach((p,i)=>{
+    const r=g3Results[i];
+    if(!r) return;
+    const div=document.createElement('div');
+    div.className='g3-summary-line '+(r.good?'good':'check');
+    div.innerHTML=`${p.emoji} <strong>${r.text}</strong>${!r.good?`<span class="correct-ver">💡 Model answer: ${r.model}</span>`:''}`;
+    lines.appendChild(div);
+  });
+  document.getElementById('g3-summary').scrollIntoView({behavior:'smooth'});
+}
+
+function g3Restart(){
+  g3Results.fill(null); g3Written.fill('');
+  g3BuildDots(); g3BuildPrompts();
+  document.getElementById('g3-summary').style.display='none';
+}
+
+g3BuildDots();
+g3BuildPrompts();
+</script>
+</body>
+</html>
